@@ -1,0 +1,59 @@
+
+Final Setup Guide: InsightFace + GPU Acceleration on Windows
+------------------------------------------------------------
+
+1. Install Python 3.10+
+
+- Download from: https://www.python.org/downloads/
+- During installation, check “Add Python to PATH”.
+
+2. (Optional) Create a virtual environment
+
+    python -m venv insightenv
+    insightenv\Scripts\activate
+
+3. Install required Python packages
+
+    pip install insightface[all] onnxruntime-gpu opencv-python
+
+This installs:
+- insightface – face detection & recognition
+- onnxruntime-gpu – for GPU acceleration via CUDA
+- opencv-python – for video/image capture and processing
+
+4. Install CUDA and cuDNN
+
+- CUDA Toolkit 12.4 or newer: https://developer.nvidia.com/cuda-toolkit
+- cuDNN 8.9 or newer: https://developer.nvidia.com/cudnn
+
+Make sure:
+- Your GPU driver supports CUDA 12.x
+- cudnn64_9.dll (or matching version) is accessible via your PATH
+
+To check GPU status:
+
+    nvidia-smi
+
+5. Verify GPU is working with InsightFace
+
+    import insightface
+    app = insightface.app.FaceAnalysis(name='buffalo_s', providers=['CUDAExecutionProvider'])
+    app.prepare(ctx_id=0)
+    print("Using providers:", app.providers)
+
+Expected output:
+
+    Using providers: ['CUDAExecutionProvider']
+
+6. Folder structure
+
+your_project/
+├── faces/         # Known face images (JPG or PNG)
+├── videos/        # Optional video inputs
+├── main.py        # Your recognition script
+
+Optional Tips
+
+- To capture screen: use mss or pyautogui.
+- To use YOLO object detection: pip install ultralytics
+- You can precompute face embeddings for speed.

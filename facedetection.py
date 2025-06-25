@@ -5,10 +5,12 @@ import os
 import tools
 
 detected = []
+face_cache = []
 #scale = 1.0  # Scale factor for bounding box coordinates
 remove_pii = False  # Remove PII from the code comments
 
 known_faces = {}  # Dictionary to store known face embeddings
+threshold = 0.4
 
 # Load model (includes detector and recognition model)
 # buffalo_l is a lightweight model suitable for real-time applications
@@ -17,7 +19,7 @@ model = FaceAnalysis(name='buffalo_m',
         #root='models',
         providers=['CUDAExecutionProvider'], 
         allowed_modules=['detection', 'recognition', 'genderage'])
-model.prepare(ctx_id=0)  # 0 = use GPU
+model.prepare(ctx_id=0, det_thresh=threshold)  # 0 = use GPU
 
 def normalize(embedding):
     return embedding / np.linalg.norm(embedding)
@@ -32,6 +34,7 @@ def setup():
         for filename in files:
             if filename.lower().endswith(".jpg") or filename.lower().endswith(".jpeg") or filename.lower().endswith(".png"):
                 img = cv2.imread(os.path.join(root, filename))
+                print(filename)
                 faces = model.get(img)
                 if faces:
                     embedding = normalize(faces[0].embedding)
@@ -114,7 +117,7 @@ def draw(frame, scale):
         label = f"{name} {age} {sex} {best_score:.1f}"
         
         # Calculate text size
-        (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)
+        (text_width, text_height), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.4, 1)
         # Draw filled rectangle under the text
         cv2.rectangle(frame, 
                   (box[0], box[1] - 7 - text_height - baseline), 
@@ -122,6 +125,10 @@ def draw(frame, scale):
                   (0, 255, 0), 
                   thickness=cv2.FILLED)
         # Draw the text label
-        cv2.putText(frame, label, (box[0], box[1] - 10),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+        #cv2.putText(frame, label, (box[0], box[1] - 10),
+        #    cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 0, 0), 1)
+        y = max(0, box[1] - 20)
+        frame = tools.draw_unicode_text(frame, label, (box[0], y), font_path="ARIAL.TTF", font_size=14)
+        
+    return frame
     

@@ -67,8 +67,7 @@ while True:
         objectdetection.detect_objects(small_frame, scale)
         facedetection.detectfaces(rgb_small_frame)
     
-    if captureToFile:
-        videout.write(frame)
+
     
     key = cv2.waitKey(1)
     #print(key)
@@ -86,6 +85,7 @@ while True:
         break
     if key == ord("c"):
         captureToFile = not captureToFile
+        print(f"Capture to file: {'ON' if captureToFile else 'OFF'}")
         
         if videout is None and captureToFile:
             videout = videwrite.setup(20, capture_area["width"], capture_area["height"])        
@@ -109,8 +109,12 @@ while True:
         
 
     objectdetection.draw(frame, scale)
-    facedetection.draw(frame, scale)
+    temp = facedetection.draw(frame, scale)
+    if temp is not None:
+        frame = temp
 
+    if captureToFile:
+        videout.write(frame)
     cv2.imshow("Face Recognition", frame)
     
     frame_count += 1

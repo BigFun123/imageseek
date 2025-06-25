@@ -1,4 +1,7 @@
 import cv2
+from PIL import ImageFont, ImageDraw, Image
+import numpy as np
+
 corner_length = 5  # Length of the corner lines
 
 def drawOutlineBox(frame, bounds, color=(0, 255, 0), thickness=2):
@@ -23,3 +26,15 @@ def drawOutlineBox(frame, bounds, color=(0, 255, 0), thickness=2):
 def get_timestamp():
     from datetime import datetime
     return datetime.now().strftime("%Y%m%d-%H%M%S")
+
+def draw_unicode_text(frame, text, position, font_path="arial.ttf", font_size=14, color=(0, 10, 0)):
+    # Convert frame to PIL image
+    img_pil = Image.fromarray(frame)
+    draw = ImageDraw.Draw(img_pil)
+    try:
+        font = ImageFont.truetype(font_path, font_size)
+    except IOError:
+        font = ImageFont.load_default()
+
+    draw.text(position, text, font=font, fill=color)
+    return np.array(img_pil)
